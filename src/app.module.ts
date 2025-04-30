@@ -12,7 +12,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { SeedersController } from "./seeders/seeders.controller";
 import { SeedersModule } from "./seeders/seeders.module";
 import { RoleRepository } from "./common/repositories/role.repository";
-import { PublicationsModule } from './publications/publications.module';
+import { PublicationsModule } from "./publications/publications.module";
 
 @Module({
     imports: [
