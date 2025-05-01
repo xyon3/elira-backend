@@ -1,19 +1,26 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import * as cookieParser from 'cookie-parser';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import * as cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: ['https://elira-frontend.vercel.app', 'http://localhost:3000'],
-    methods: '*',
-  });
+    app.enableCors({
+        origin: ["https://elira-frontend.vercel.app", "http://localhost:3000"],
+        methods: "*",
+    });
 
-  app.use(cookieParser());
+    app.use(cookieParser());
 
-  app.setGlobalPrefix('api');
+    app.use(
+        helmet({
+            hsts: false,
+        }),
+    );
 
-  await app.listen(process.env.APPLICATION_PORT ?? 3443);
+    app.setGlobalPrefix("api");
+
+    await app.listen(process.env.APPLICATION_PORT ?? 3443);
 }
 bootstrap();
