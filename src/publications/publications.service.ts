@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 import { CreatePublicationDto } from "./dto/create-publication.dto";
 import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { UserRepository } from "src/users/users.repository";
@@ -16,7 +20,7 @@ export class PublicationsService {
         createPublicationDto: CreatePublicationDto,
     ): Promise<Publication> {
         const uploader = await this.userRepository.findBy({
-            id: createPublicationDto.uploader,
+            email: createPublicationDto.uploader,
         });
 
         if (uploader.length === 0) {
@@ -39,7 +43,40 @@ export class PublicationsService {
     }
 
     async update(id: string, updatePublicationDto: UpdatePublicationDto) {
-        await this.publicationRepository.update(id, updatePublicationDto);
+        const publication = await this.publicationRepository.findOneBy({ id });
+
+        if (publication == null) {
+            throw new BadRequestException("Publication does not exist");
+        }
+
+        const updatedPublication = {
+            id: updatePublicationDto.prefixID
+                ? updatePublicationDto.prefixID
+                : publication.prefixID,
+            title: updatePublicationDto.title
+                ? updatePublicationDto.title
+                : publication.title,
+            description: updatePublicationDto.description
+                ? updatePublicationDto.description
+                : publication.description,
+            path: updatePublicationDto.path
+                ? updatePublicationDto.path
+                : publication.path,
+            filename: updatePublicationDto.filename
+                ? updatePublicationDto.filename
+                : publication.filename,
+            prefixID: updatePublicationDto.prefixID
+                ? updatePublicationDto.prefixID
+                : publication.prefixID,
+            degree: updatePublicationDto.degree
+                ? updatePublicationDto.degree
+                : publication.degree,
+            uploadDate: updatePublicationDto.uploadDate
+                ? updatePublicationDto.uploadDate
+                : publication.uploadDate,
+        };
+
+        await this.publicationRepository.update(id, updatedPublication);
         return this.publicationRepository.findOneBy({ id });
     }
 

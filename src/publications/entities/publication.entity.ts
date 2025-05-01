@@ -15,8 +15,8 @@ export class Publication {
     @Column({ nullable: false })
     title: string;
 
-    @Column({ name: "abstract" })
-    _abstract: string;
+    @Column({ nullable: true })
+    description: string;
 
     @Column()
     authors: string;
@@ -24,16 +24,25 @@ export class Publication {
     @Column({ name: "issue_date" })
     issueDate: string;
 
-    @Column()
+    @Column({ nullable: true })
     degree: string;
 
     @Column({ name: "view_count" })
     viewCount: number;
 
+    @Column({ nullable: true })
+    path: string;
+
+    @Column({ nullable: true })
+    filename: string;
+
+    @Column({ nullable: true })
+    prefixID: string;
+
     @Column({
         name: "upload_date",
         type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
+        nullable: true,
     })
     uploadDate: Date;
 

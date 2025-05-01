@@ -1,5 +1,8 @@
 export class CreatePublicationDto {
     title: string;
     description?: string;
-    uploader: number;
+    degree?: string;
+    uploader: string;
+    authors: string;
+    issueDate: string;
 }

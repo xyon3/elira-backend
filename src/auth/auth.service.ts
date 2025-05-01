@@ -1,8 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { AuthenticateDto } from "./dto/authenticate.dto";
+import { UserRepository } from "src/users/users.repository";
 
 @Injectable()
 export class AuthService {
+    constructor(private readonly userRepository: UserRepository) {}
+
     async signin(authenticateDto: AuthenticateDto) {
         if (
             authenticateDto.email == undefined ||
@@ -14,25 +17,20 @@ export class AuthService {
             );
         }
 
-        return {};
+        const user = await this.userRepository.findOneBy({
+            email: authenticateDto.email,
+            password: authenticateDto.password,
+        });
 
-        // const user = await database
-        //     .select()
-        //     .from(users)
-        //     .where(
-        //         and(
-        //             eq(users.email, authenticateDto.email),
-        //             eq(users.passcode, authenticateDto.password),
-        //         ),
-        //     );
+        console.log(user);
 
-        // if (user.length === 0) {
-        //     throw new HttpException(
-        //         "email or password is wrong",
-        //         HttpStatus.UNAUTHORIZED,
-        //     );
-        // }
-        //
-        // return user;
+        if (user === null) {
+            throw new HttpException(
+                "Incorrect email or password",
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        return user;
     }
 }

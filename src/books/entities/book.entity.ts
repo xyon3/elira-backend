@@ -15,16 +15,25 @@ export class Book {
     @Column({ nullable: false })
     title: string;
 
-    @Column()
+    @Column({ nullable: true })
     description: string;
 
     @Column({ name: "view_count" })
     viewCount: number;
 
+    @Column({ nullable: true })
+    path: string;
+
+    @Column({ nullable: true })
+    filename: string;
+
+    @Column({ nullable: true })
+    prefixID: string;
+
     @Column({
         name: "upload_date",
         type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
+        nullable: true,
     })
     uploadDate: Date;
 

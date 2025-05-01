@@ -40,6 +40,7 @@ export class UsersService {
 
         const user: User = {
             ...createUserDto,
+            isActive: 1,
             role,
         };
 
@@ -72,14 +73,30 @@ export class UsersService {
         };
     }
 
-    async remove(id: number) {
+    async activateUser(id: number) {
         const user = await this.userRepository.findOneBy({ id });
 
         if (user == null) {
             throw new NotFoundException("user was not found");
         }
 
-        this.userRepository.remove(user);
+        this.userRepository.update(user.id, {
+            isActive: 1,
+        });
+
+        return { msg: "user removed" };
+    }
+
+    async deactivateUser(id: number) {
+        const user = await this.userRepository.findOneBy({ id });
+
+        if (user == null) {
+            throw new NotFoundException("user was not found");
+        }
+
+        this.userRepository.update(user.id, {
+            isActive: 0,
+        });
 
         return { msg: "user removed" };
     }

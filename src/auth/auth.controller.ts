@@ -2,23 +2,25 @@ import { Body, Controller, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { AuthenticateDto } from "./dto/authenticate.dto";
 import { AuthService } from "./auth.service";
+import { randomUUID } from "crypto";
 
 @Controller("auth")
 export class AuthController {
     constructor(protected readonly authService: AuthService) {}
 
-    @Post()
+    @Post("signin")
     async authenticate(
         @Req() request: Request,
         @Res({ passthrough: true }) response: Response,
         @Body() authenticateDto: AuthenticateDto,
     ) {
         if (authenticateDto.isGuest) {
-            const value = {
+            const token = {
                 role: "guest",
+                session: randomUUID().toString(),
             };
 
-            response.cookie("token", JSON.stringify(value), {
+            response.cookie("token", JSON.stringify(token), {
                 path: "/",
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
             });
@@ -29,9 +31,20 @@ export class AuthController {
         } else {
             const user = await this.authService.signin(authenticateDto);
 
+            const token = {
+                code: user.role.id,
+                role: user.role.title,
+                session: randomUUID().toString(),
+            };
+
+            response.cookie("token", JSON.stringify(token), {
+                path: "/",
+                maxAge: 1000 * 60 * 60 * 2, // 1 day
+            });
+
             return {
                 status: "SUCCESS",
-                user,
+                as: token.role,
             };
         }
     }

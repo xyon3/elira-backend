@@ -13,6 +13,11 @@ import { SeedersController } from "./seeders/seeders.controller";
 import { SeedersModule } from "./seeders/seeders.module";
 import { RoleRepository } from "./common/repositories/role.repository";
 import { PublicationsModule } from "./publications/publications.module";
+import { FileModule } from "./file/file.module";
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from "path";
+import { UsersService } from "./users/users.service";
+import { UserRepository } from "./users/users.repository";
 
 @Module({
     imports: [
@@ -29,10 +34,15 @@ import { PublicationsModule } from "./publications/publications.module";
             entities: [__dirname + "/**/*.entity{.ts,.js}"],
             synchronize: true,
         }),
+        ServeStaticModule.forRoot({
+            rootPath: join(__dirname, "..", "uploads"),
+            serveRoot: "/files",
+        }),
         UsersModule,
         BooksModule,
         SeedersModule,
         PublicationsModule,
+        FileModule,
     ],
     controllers: [AppController, AuthController, SeedersController],
     providers: [
@@ -41,6 +51,7 @@ import { PublicationsModule } from "./publications/publications.module";
         RolesService,
         AuthService,
         RoleRepository,
+        UserRepository,
     ],
 })
 export class AppModule {}
