@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePublicationDto } from './dto/create-publication.dto';
-import { UpdatePublicationDto } from './dto/update-publication.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { CreatePublicationDto } from "./dto/create-publication.dto";
+import { UpdatePublicationDto } from "./dto/update-publication.dto";
+import { UserRepository } from "src/users/users.repository";
+import { Publication } from "./entities/publication.entity";
+import { PublicationRepository } from "./publication.repository";
 
 @Injectable()
 export class PublicationsService {
-  create(createPublicationDto: CreatePublicationDto) {
-    return 'This action adds a new publication';
-  }
+    constructor(
+        protected readonly publicationRepository: PublicationRepository,
+        protected readonly userRepository: UserRepository,
+    ) {}
 
-  findAll() {
-    return `This action returns all publications`;
-  }
+    async create(
+        createPublicationDto: CreatePublicationDto,
+    ): Promise<Publication> {
+        const uploader = await this.userRepository.findBy({
+            id: createPublicationDto.uploader,
+        });
 
-  findOne(id: number) {
-    return `This action returns a #${id} publication`;
-  }
+        if (uploader.length === 0) {
+            throw new NotFoundException("user does not exist");
+        }
 
-  update(id: number, updatePublicationDto: UpdatePublicationDto) {
-    return `This action updates a #${id} publication`;
-  }
+        return this.publicationRepository.save({
+            ...createPublicationDto,
+            viewCount: 0,
+            uploadedBy: uploader[0],
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} publication`;
-  }
+    async findAll(): Promise<Publication[]> {
+        return this.publicationRepository.find();
+    }
+
+    async findOne(id: string): Promise<Publication | null> {
+        return this.publicationRepository.findOneBy({ id });
+    }
+
+    async update(id: string, updatePublicationDto: UpdatePublicationDto) {
+        await this.publicationRepository.update(id, updatePublicationDto);
+        return this.publicationRepository.findOneBy({ id });
+    }
+
+    async remove(id: string): Promise<void> {
+        await this.publicationRepository.delete(id);
+    }
 }

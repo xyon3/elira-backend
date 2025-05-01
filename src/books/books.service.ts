@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Book } from "./entities/book.entity";
+import { CreateBookDto } from "./dto/create-book.dto";
+import { BookRepository } from "./books.repository";
+import { UserRepository } from "src/users/users.repository";
+import { UpdateBookDto } from "./dto/update-book.dto";
 
 @Injectable()
 export class BooksService {
-  create(createBookDto: CreateBookDto) {
-    return 'This action adds a new book';
-  }
+    constructor(
+        protected readonly bookRepository: BookRepository,
+        protected readonly userRepository: UserRepository,
+    ) {}
 
-  findAll() {
-    return `This action returns all books`;
-  }
+    async create(createBookDto: CreateBookDto): Promise<Book> {
+        const uploader = await this.userRepository.findBy({
+            id: createBookDto.uploader,
+        });
 
-  findOne(id: number) {
-    return `This action returns a #${id} book`;
-  }
+        if (uploader.length === 0) {
+            throw new NotFoundException("user does not exist");
+        }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
-  }
+        return this.bookRepository.save({
+            ...createBookDto,
+            viewCount: 0,
+            uploadedBy: uploader[0],
+        });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
-  }
+    async findAll(): Promise<Book[]> {
+        return this.bookRepository.find();
+    }
+
+    async findOne(id: string): Promise<Book | null> {
+        return this.bookRepository.findOneBy({ id });
+    }
+
+    async update(id: string, updateBookDto: UpdateBookDto) {
+        await this.bookRepository.update(id, updateBookDto);
+        return this.bookRepository.findOneBy({ id });
+    }
+
+    async remove(id: string): Promise<void> {
+        await this.bookRepository.delete(id);
+    }
 }
