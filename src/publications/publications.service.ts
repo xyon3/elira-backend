@@ -8,6 +8,7 @@ import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { UserRepository } from "src/users/users.repository";
 import { Publication } from "./entities/publication.entity";
 import { PublicationRepository } from "./publication.repository";
+import { FindOptionsOrder } from "typeorm";
 
 @Injectable()
 export class PublicationsService {
@@ -34,8 +35,48 @@ export class PublicationsService {
         });
     }
 
-    async findAll(): Promise<Publication[]> {
-        return this.publicationRepository.find();
+    async findAll(
+        isPaginated: number = 1,
+        page: number = 1,
+        limit: number = 10,
+        randomize: number = 0,
+    ) {
+        let order: FindOptionsOrder<Publication> = {
+            uploadDate: "desc",
+        };
+
+        if (randomize) {
+            order = {
+                id: "desc",
+            };
+        }
+        console.log(order);
+
+        if (isPaginated) {
+            const [data, total] = await this.publicationRepository.findAndCount(
+                {
+                    order,
+                    skip: (page - 1) * limit,
+                    take: limit,
+                },
+            );
+
+            return {
+                data,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    lastPage: Math.ceil(total / limit),
+                },
+            };
+        }
+
+        return this.publicationRepository.find({
+            order: {
+                uploadDate: "desc",
+            },
+        });
     }
 
     async findOne(id: string): Promise<Publication | null> {

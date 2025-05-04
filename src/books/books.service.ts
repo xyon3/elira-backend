@@ -8,6 +8,7 @@ import { CreateBookDto } from "./dto/create-book.dto";
 import { BookRepository } from "./books.repository";
 import { UserRepository } from "src/users/users.repository";
 import { UpdateBookDto } from "./dto/update-book.dto";
+import { FindOptionsOrder } from "typeorm";
 
 @Injectable()
 export class BooksService {
@@ -33,8 +34,45 @@ export class BooksService {
         });
     }
 
-    async findAll(): Promise<Book[]> {
-        return this.bookRepository.find();
+    async findAll(
+        isPaginated: number = 1,
+        page: number = 1,
+        limit: number = 10,
+        randomize: number = 0,
+    ) {
+        let order: FindOptionsOrder<Book> = {
+            uploadDate: "desc",
+        };
+
+        if (randomize) {
+            order = {
+                id: "desc",
+            };
+        }
+
+        if (isPaginated) {
+            const [data, total] = await this.bookRepository.findAndCount({
+                order,
+                skip: (page - 1) * limit,
+                take: limit,
+            });
+
+            return {
+                data,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    lastPage: Math.ceil(total / limit),
+                },
+            };
+        }
+
+        return this.bookRepository.find({
+            order: {
+                uploadDate: "desc",
+            },
+        });
     }
 
     async findOne(id: string): Promise<Book | null> {

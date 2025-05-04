@@ -15,7 +15,7 @@ export class Publication {
     @Column({ nullable: false })
     title: string;
 
-    @Column({ nullable: true })
+    @Column({ type: "text", nullable: true })
     description: string;
 
     @Column()

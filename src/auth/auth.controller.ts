@@ -34,17 +34,20 @@ export class AuthController {
             const token = {
                 code: user.role.id,
                 role: user.role.title,
+                name: user.fullname,
                 session: randomUUID().toString(),
+                email: authenticateDto.email,
             };
-
-            response.cookie("token", JSON.stringify(token), {
-                path: "/",
-                maxAge: 1000 * 60 * 60 * 2, // 1 day
-            });
 
             return {
                 status: "SUCCESS",
                 as: token.role,
+                cookieParams: {
+                    name: "token",
+                    value: JSON.stringify(token),
+                    path: "/",
+                    maxAge: 1000 * 60 * 60 * 2, // 1 day
+                },
             };
         }
     }

@@ -6,6 +6,7 @@ import {
     Patch,
     Param,
     Delete,
+    Query,
 } from "@nestjs/common";
 import { BooksService } from "./books.service";
 import { CreateBookDto } from "./dto/create-book.dto";
@@ -21,7 +22,20 @@ export class BooksController {
     }
 
     @Get()
-    findAll() {
+    findAll(
+        @Query("isPaginated") isPaginated: string,
+        @Query("page") page: string,
+        @Query("limit") limit: string,
+        @Query("randomize") randomize: string,
+    ) {
+        if (isPaginated === "1") {
+            return this.booksService.findAll(
+                parseInt(isPaginated),
+                parseInt(page),
+                parseInt(limit),
+                parseInt(randomize),
+            );
+        }
         return this.booksService.findAll();
     }
 

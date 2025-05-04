@@ -6,6 +6,7 @@ import {
     Patch,
     Param,
     Delete,
+    Query,
 } from "@nestjs/common";
 import { PublicationsService } from "./publications.service";
 import { CreatePublicationDto } from "./dto/create-publication.dto";
@@ -21,7 +22,20 @@ export class PublicationsController {
     }
 
     @Get()
-    findAll() {
+    findAll(
+        @Query("isPaginated") isPaginated: string,
+        @Query("page") page: string,
+        @Query("limit") limit: string,
+        @Query("randomize") randomize: string,
+    ) {
+        if (isPaginated === "1") {
+            return this.publicationsService.findAll(
+                parseInt(isPaginated),
+                parseInt(page),
+                parseInt(limit),
+                parseInt(randomize),
+            );
+        }
         return this.publicationsService.findAll();
     }
 

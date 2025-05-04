@@ -15,7 +15,7 @@ export class Book {
     @Column({ nullable: false })
     title: string;
 
-    @Column({ nullable: true })
+    @Column({ type: "text", nullable: true })
     description: string;
 
     @Column({ name: "view_count" })
