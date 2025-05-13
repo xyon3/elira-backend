@@ -17,19 +17,19 @@ export class Book {
     title: string;
 
     @Column({ type: "text", nullable: true })
-    description: string;
+    description?: string;
 
     @Column({ name: "view_count" })
     viewCount: number;
 
     @Column({ nullable: true })
-    path: string;
+    path?: string;
 
     @Column({ nullable: true })
-    filename: string;
+    filename?: string;
 
     @Column({ nullable: true })
-    prefixID: string;
+    prefixID?: string;
 
     @Column({
         name: "upload_date",
@@ -42,7 +42,7 @@ export class Book {
     @JoinColumn({ name: "uploaded_by" })
     uploadedBy: User;
 
-    @ManyToOne(() => Shelf, (shelf) => shelf.books, { lazy: true })
+    @ManyToOne(() => Shelf, (shelf) => shelf.books)
     @JoinColumn()
     shelf: Shelf;
 }

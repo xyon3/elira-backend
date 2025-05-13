@@ -23,7 +23,6 @@ export class BooksService {
         const uploader = await this.userRepository.findBy({
             email: createBookDto.uploader,
         });
-        console.log(uploader);
 
         if (uploader.length === 0) {
             throw new NotFoundException("user does not exist");
@@ -34,7 +33,7 @@ export class BooksService {
         });
 
         if (defaultShelf) {
-            return this.bookRepository.save({
+            return await this.bookRepository.save({
                 ...createBookDto,
                 viewCount: 0,
                 uploadedBy: uploader[0],
