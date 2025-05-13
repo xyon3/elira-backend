@@ -20,7 +20,11 @@ async function bootstrap() {
                     defaultSrc: ["'self'"],
                     scriptSrc: ["'self'"],
                     styleSrc: ["'self'", "'unsafe-inline'"],
-                    frameAncestors: ["'self'", "http://localhost:8000"], // 👈 allow Next.js dev server to iframe this
+                    frameAncestors: [
+                        "'self'",
+                        "http://localhost:8000",
+                        "https://elira-frontend.vercel.app",
+                    ], // 👈 allow Next.js dev server to iframe this
                 },
             },
             hsts: false,
