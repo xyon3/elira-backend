@@ -27,13 +27,25 @@ export class PublicationsController {
         @Query("page") page: string,
         @Query("limit") limit: string,
         @Query("randomize") randomize: string,
+        @Query("keyword") keyword: string,
     ) {
+        if (keyword) {
+            return this.publicationsService.findAll(
+                parseInt(isPaginated),
+                parseInt(page),
+                parseInt(limit),
+                parseInt(randomize),
+                keyword,
+            );
+        }
+
         if (isPaginated === "1") {
             return this.publicationsService.findAll(
                 parseInt(isPaginated),
                 parseInt(page),
                 parseInt(limit),
                 parseInt(randomize),
+                keyword,
             );
         }
         return this.publicationsService.findAll();

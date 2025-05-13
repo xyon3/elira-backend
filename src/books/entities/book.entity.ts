@@ -1,3 +1,4 @@
+import { Shelf } from "src/shelves/entities/shelf.entity";
 import { User } from "src/users/entities/user.entity";
 import {
     Column,
@@ -40,4 +41,8 @@ export class Book {
     @ManyToOne(() => User, (user) => user.books, { eager: true })
     @JoinColumn({ name: "uploaded_by" })
     uploadedBy: User;
+
+    @ManyToOne(() => Shelf, (shelf) => shelf.books, { lazy: true })
+    @JoinColumn()
+    shelf: Shelf;
 }

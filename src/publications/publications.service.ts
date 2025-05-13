@@ -8,7 +8,7 @@ import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { UserRepository } from "src/users/users.repository";
 import { Publication } from "./entities/publication.entity";
 import { PublicationRepository } from "./publication.repository";
-import { FindOptionsOrder } from "typeorm";
+import { FindOptionsOrder, ILike } from "typeorm";
 
 @Injectable()
 export class PublicationsService {
@@ -40,6 +40,7 @@ export class PublicationsService {
         page: number = 1,
         limit: number = 10,
         randomize: number = 0,
+        search?: string,
     ) {
         let order: FindOptionsOrder<Publication> = {
             uploadDate: "desc",
@@ -55,6 +56,12 @@ export class PublicationsService {
         if (isPaginated) {
             const [data, total] = await this.publicationRepository.findAndCount(
                 {
+                    where: search
+                        ? [
+                              { title: ILike(`%${search}%`) }, // adjust to your column
+                              { description: ILike(`%${search}%`) }, // add other fields as needed
+                          ]
+                        : undefined,
                     order,
                     skip: (page - 1) * limit,
                     take: limit,
@@ -115,7 +122,15 @@ export class PublicationsService {
             uploadDate: updatePublicationDto.uploadDate
                 ? updatePublicationDto.uploadDate
                 : publication.uploadDate,
+            issueDate: updatePublicationDto.issueDate
+                ? updatePublicationDto.issueDate
+                : publication.issueDate,
+            authors: updatePublicationDto.authors
+                ? updatePublicationDto.authors
+                : publication.authors,
         };
+
+        console.log(updatedPublication);
 
         await this.publicationRepository.update(id, updatedPublication);
         return this.publicationRepository.findOneBy({ id });

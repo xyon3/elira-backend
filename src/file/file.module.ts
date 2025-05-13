@@ -6,6 +6,7 @@ import { PublicationsService } from "src/publications/publications.service";
 import { BookRepository } from "src/books/books.repository";
 import { PublicationRepository } from "src/publications/publication.repository";
 import { UserRepository } from "src/users/users.repository";
+import { ShelfRepository } from "src/shelf.repository/shelf.repository";
 
 @Module({
     controllers: [FileController],
@@ -16,6 +17,7 @@ import { UserRepository } from "src/users/users.repository";
         BookRepository,
         PublicationRepository,
         UserRepository,
+        ShelfRepository,
     ],
 })
 export class FileModule {}

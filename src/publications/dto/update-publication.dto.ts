@@ -6,4 +6,6 @@ export class UpdatePublicationDto {
     prefixID?: string;
     degree?: string;
     uploadDate?: Date;
+    issueDate?: string;
+    authors?: string;
 }

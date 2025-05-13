@@ -42,6 +42,7 @@ export class AuthController {
             return {
                 status: "SUCCESS",
                 as: token.role,
+                isActive: user.isActive,
                 cookieParams: {
                     name: "token",
                     value: JSON.stringify(token),

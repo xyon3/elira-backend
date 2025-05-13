@@ -16,8 +16,9 @@ import { PublicationsModule } from "./publications/publications.module";
 import { FileModule } from "./file/file.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from "path";
-import { UsersService } from "./users/users.service";
 import { UserRepository } from "./users/users.repository";
+import { ShelvesModule } from "./shelves/shelves.module";
+import { ShelfRepository } from "./shelf.repository/shelf.repository";
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { UserRepository } from "./users/users.repository";
         SeedersModule,
         PublicationsModule,
         FileModule,
+        ShelvesModule,
     ],
     controllers: [AppController, AuthController, SeedersController],
     providers: [
@@ -52,6 +54,7 @@ import { UserRepository } from "./users/users.repository";
         AuthService,
         RoleRepository,
         UserRepository,
+        ShelfRepository,
     ],
 })
 export class AppModule {}

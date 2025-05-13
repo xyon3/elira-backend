@@ -49,7 +49,17 @@ export class UsersService {
         return {};
     }
 
-    async findAll() {
+    async findAll(filter: string) {
+        if (filter === "depts") {
+            return {
+                users: await this.userRepository.find({
+                    where: { role: { id: 2 } },
+
+                    relations: ["role"], // 👈 make sure the role relation is loaded
+                }),
+            };
+        }
+
         return { users: await this.userRepository.find() };
     }
 

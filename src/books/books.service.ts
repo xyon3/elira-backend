@@ -9,15 +9,17 @@ import { BookRepository } from "./books.repository";
 import { UserRepository } from "src/users/users.repository";
 import { UpdateBookDto } from "./dto/update-book.dto";
 import { FindOptionsOrder } from "typeorm";
+import { ShelfRepository } from "src/shelf.repository/shelf.repository";
 
 @Injectable()
 export class BooksService {
     constructor(
         protected readonly bookRepository: BookRepository,
         protected readonly userRepository: UserRepository,
+        protected readonly shelfRepository: ShelfRepository,
     ) {}
 
-    async create(createBookDto: CreateBookDto): Promise<Book> {
+    async create(createBookDto: CreateBookDto) {
         const uploader = await this.userRepository.findBy({
             email: createBookDto.uploader,
         });
@@ -27,11 +29,18 @@ export class BooksService {
             throw new NotFoundException("user does not exist");
         }
 
-        return this.bookRepository.save({
-            ...createBookDto,
-            viewCount: 0,
-            uploadedBy: uploader[0],
+        const defaultShelf = await this.shelfRepository.findOneBy({
+            _id: "default",
         });
+
+        if (defaultShelf) {
+            return this.bookRepository.save({
+                ...createBookDto,
+                viewCount: 0,
+                uploadedBy: uploader[0],
+                shelf: defaultShelf,
+            });
+        }
     }
 
     async findAll(
