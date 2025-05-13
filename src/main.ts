@@ -24,6 +24,8 @@ async function bootstrap() {
                         "'self'",
                         "http://localhost:8000",
                         "https://elira-frontend.vercel.app",
+                        "http://ec2-54-179-190-76.ap-southeast-1.compute.amazonaws.com:3000",
+                        "http://ec2-54-179-190-76.ap-southeast-1.compute.amazonaws.com",
                     ], // 👈 allow Next.js dev server to iframe this
                 },
             },
