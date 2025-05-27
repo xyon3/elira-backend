@@ -111,6 +111,22 @@ export class UsersService {
         return { msg: "user removed" };
     }
 
+    async deleteUser(id: number) {
+        try {
+            const user = await this.userRepository.findOneBy({ id });
+
+            if (user == null) {
+                throw new NotFoundException("user was not found");
+            }
+            await this.userRepository.delete({
+                id: user.id,
+            });
+            return { msg: "user deleted" };
+        } catch (e) {
+            return { msg: "err", e };
+        }
+    }
+
     async describeRoles() {
         return this.roleService.getALlPermission();
     }

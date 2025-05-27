@@ -19,6 +19,7 @@ import { join } from "path";
 import { UserRepository } from "./users/users.repository";
 import { ShelvesModule } from "./shelves/shelves.module";
 import { ShelfRepository } from "./shelf.repository/shelf.repository";
+import { StatusModule } from './status/status.module';
 
 @Module({
     imports: [
@@ -28,7 +29,7 @@ import { ShelfRepository } from "./shelf.repository/shelf.repository";
         TypeOrmModule.forRoot({
             type: "mysql",
             host: process.env.DB_HOST ?? "",
-            port: 3306,
+            port: 33066,
             username: process.env.DB_USER ?? "",
             password: process.env.DB_PASS ?? "",
             database: process.env.DB_NAME ?? "",
@@ -45,6 +46,7 @@ import { ShelfRepository } from "./shelf.repository/shelf.repository";
         PublicationsModule,
         FileModule,
         ShelvesModule,
+        StatusModule,
     ],
     controllers: [AppController, AuthController, SeedersController],
     providers: [

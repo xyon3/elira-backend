@@ -35,6 +35,24 @@ export class PublicationsService {
         });
     }
 
+    async findByDept(
+        isPaginated: number = 1,
+        page: number = 1,
+        limit: number = 10,
+        randomize: number = 0,
+        dept: string,
+        search?: string,
+    ) {
+        return this.publicationRepository.find({
+            where: {
+                uploadedBy: { email: dept },
+            },
+            order: {
+                uploadDate: "desc",
+            },
+        });
+    }
+
     async findAll(
         isPaginated: number = 1,
         page: number = 1,

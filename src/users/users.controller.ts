@@ -42,7 +42,9 @@ export class UsersController {
     }
 
     @Delete(":id")
-    deactivate(@Param("id") id: string) {
+    deactivate(@Param("id") id: string, @Query("persist") persist: string) {
+        if (persist === "true") return this.usersService.deleteUser(+id);
+
         return this.usersService.deactivateUser(+id);
     }
 }

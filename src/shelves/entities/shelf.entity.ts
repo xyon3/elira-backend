@@ -6,7 +6,7 @@ export class Shelf {
     @PrimaryColumn()
     _id: string;
 
-    @Column()
+    @Column({ nullable: true })
     description: string;
 
     @OneToMany(() => Book, (book) => book.shelf, { eager: true })

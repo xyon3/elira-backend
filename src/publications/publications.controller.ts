@@ -28,8 +28,20 @@ export class PublicationsController {
         @Query("limit") limit: string,
         @Query("randomize") randomize: string,
         @Query("keyword") keyword: string,
+        @Query("dept") dept: string,
     ) {
+        console.log(dept);
         if (keyword) {
+            if (dept) {
+                return this.publicationsService.findByDept(
+                    parseInt(isPaginated),
+                    parseInt(page),
+                    parseInt(limit),
+                    parseInt(randomize),
+                    dept,
+                    keyword,
+                );
+            }
             return this.publicationsService.findAll(
                 parseInt(isPaginated),
                 parseInt(page),
@@ -40,6 +52,16 @@ export class PublicationsController {
         }
 
         if (isPaginated === "1") {
+            if (dept) {
+                return this.publicationsService.findByDept(
+                    parseInt(isPaginated),
+                    parseInt(page),
+                    parseInt(limit),
+                    parseInt(randomize),
+                    dept,
+                    keyword,
+                );
+            }
             return this.publicationsService.findAll(
                 parseInt(isPaginated),
                 parseInt(page),
