@@ -4,6 +4,7 @@ import { StatusController } from "./status.controller";
 import { PublicationRepository } from "src/publications/publication.repository";
 import { BookRepository } from "src/books/books.repository";
 import { UserRepository } from "src/users/users.repository";
+import { PopularityProvider } from "src/providers/popularity.provider";
 
 @Module({
     controllers: [StatusController],
@@ -12,6 +13,7 @@ import { UserRepository } from "src/users/users.repository";
         PublicationRepository,
         BookRepository,
         UserRepository,
+        PopularityProvider,
     ],
 })
 export class StatusModule {}

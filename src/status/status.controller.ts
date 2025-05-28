@@ -33,21 +33,28 @@ export class StatusController {
     }
 
     @Post("total-uploads/book")
-    bookTotalUploads(totalBookUploads: { departmentID: number }) {
+    bookTotalUploads(@Body() totalBookUploads: { departmentID: number }) {
         return this.statusService.totalBookUploadsPerDepartment(
             totalBookUploads,
         );
     }
 
     @Post("total-uploads/publication")
-    publicationTotalUploads(totalPublicationUploads: { departmentID: number }) {
+    publicationTotalUploads(
+        @Body() totalPublicationUploads: { departmentID: number },
+    ) {
         return this.statusService.totalPublicationUploadsPerDepartment(
             totalPublicationUploads,
         );
     }
 
+    @Post("v2/popularity/department")
+    popularityScore2(@Body() popularityDto: { id?: number; email?: string }) {
+        return this.statusService.popularityScoreV2(popularityDto);
+    }
+
     @Post("popularity/department")
-    popularityScore(popularityDto: { id?: number; email?: string }) {
+    popularityScore(@Body() popularityDto: { id?: number; email?: string }) {
         return this.statusService.popularityScorePerDepartment(popularityDto);
     }
 }

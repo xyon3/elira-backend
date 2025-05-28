@@ -4,6 +4,7 @@ import { UpdateStatusDto } from "./dto/update-status.dto";
 import { PublicationRepository } from "src/publications/publication.repository";
 import { BookRepository } from "src/books/books.repository";
 import { UserRepository } from "src/users/users.repository";
+import { PopularityProvider } from "src/providers/popularity.provider";
 
 @Injectable()
 export class StatusService {
@@ -11,6 +12,7 @@ export class StatusService {
         private publicationRepository: PublicationRepository,
         private bookRepository: BookRepository,
         private userRespository: UserRepository,
+        private popularityProvider: PopularityProvider,
     ) {}
 
     async incrementView(incrementDto: { type: string; id: string }) {
@@ -100,6 +102,10 @@ export class StatusService {
         };
     }
 
+    async popularityScoreV2(popularityDto: { id?: number; email?: string }) {
+        return this.popularityProvider.execute(popularityDto.email);
+    }
+
     async popularityScorePerDepartment(popularityDto: {
         id?: number;
         email?: string;
@@ -111,105 +117,108 @@ export class StatusService {
             publication_views: 0.2,
         };
 
-        const departments = await this.userRespository.findBy({
-            role: { id: 2 },
+        // Load users with their books and publications
+        const departments = await this.userRespository.find({
+            where: {
+                role: { id: 2 },
+            },
+            relations: ["books", "publications"],
         });
 
-        const subject = departments.filter(
+        const subject = departments.find(
             (d) => d.email === popularityDto.email,
         );
 
-        if (subject.length == 0) {
+        if (!subject) {
             throw new NotFoundException("NO USER");
         }
 
-        if (!subject[0]) {
-            throw new NotFoundException("NO USER");
-        }
+        // Helpers
+        const safeArray = <T>(arr: T[] | undefined | null): T[] =>
+            Array.isArray(arr) ? arr : [];
 
-        // const deptStatuses = departments.map((department) => {
-        //     const publication_max_views = department.publications?.reduce(
-        //         (sum, item) => item.viewCount + sum,
-        //         0,
-        //     );
-        //
-        //     const book_max_views = department.books?.reduce(
-        //         (sum, item) => item.viewCount + sum,
-        //         0,
-        //     );
-        //
-        //     if (!publication_max_views || !book_max_views) {
-        //         return { STATUS: "ERROR" };
-        //     }
-        //
-        //     return {
-        //         id: department.id,
-        //         email: department.email,
-        //         total_views: book_max_views + publication_max_views,
-        //         publication: {
-        //             count: department.publications?.length,
-        //             max_views: publication_max_views,
-        //         },
-        //         book: {
-        //             count: department.books?.length,
-        //             max_views: book_max_views,
-        //         },
-        //     };
-        // });
-
-        const maxBookViews = Math.max(
-            ...departments.map(
-                (department) =>
-                    department.books?.reduce(
-                        (sum, item) => item.viewCount + sum,
-                        0,
-                    ) ?? 0,
-            ),
-        );
-
-        const maxPublicationViews = Math.max(
-            ...departments.map(
-                (department) =>
-                    department.publications?.reduce(
-                        (sum, item) => item.viewCount + sum,
-                        0,
-                    ) ?? 0,
-            ),
-        );
-
-        const bookCount = (departments ?? []).map((d) => d.books?.length ?? 0);
-        const publicationCount = (departments ?? []).map(
-            (d) => d.publications?.length ?? 0,
-        );
-
-        const maxBookUploads = Math.max(...bookCount);
-        const maxPublicationUploads = Math.max(...publicationCount);
-
-        const book_view_score =
-            (subject[0].books?.reduce(
-                (sum, b) => b.viewCount + sum,
+        const sumViews = (arr: any[]) =>
+            arr.reduce(
+                (sum, item) => sum + (item.viewCount ?? item.view_count ?? 0),
                 0,
-            ) as number) / maxBookViews;
+            );
 
-        const book_uploads_score =
-            (subject[0].books?.length as number) / maxBookUploads;
+        // Metrics for all departments
+        const bookViews = departments.map((dept) =>
+            sumViews(safeArray(dept.books)),
+        );
+        const publicationViews = departments.map((dept) =>
+            sumViews(safeArray(dept.publications)),
+        );
 
+        const maxBookViews = Math.max(...bookViews, 1);
+        const maxPublicationViews = Math.max(...publicationViews, 1);
+
+        const bookUploads = departments.map(
+            (dept) => safeArray(dept.books).length,
+        );
+        const publicationUploads = departments.map(
+            (dept) => safeArray(dept.publications).length,
+        );
+
+        const maxBookUploads = Math.max(...bookUploads, 1);
+        const maxPublicationUploads = Math.max(...publicationUploads, 1);
+
+        // Subject-specific values
+        const subjectBooks = safeArray(subject.books);
+        const subjectPublications = safeArray(subject.publications);
+
+        const subjectBookViews = sumViews(subjectBooks);
+        const subjectBookUploads = subjectBooks.length;
+
+        const subjectPublicationViews = sumViews(subjectPublications);
+        const subjectPublicationUploads = subjectPublications.length;
+
+        // Scoring
+        const book_view_score = subjectBookViews / maxBookViews;
+        const book_uploads_score = subjectBookUploads / maxBookUploads;
         const publication_view_score =
-            (subject[0].publications?.reduce(
-                (sum, b) => b.viewCount + sum,
-                0,
-            ) as number) / maxPublicationViews;
-
+            subjectPublicationViews / maxPublicationViews;
         const publication_uploads_score =
-            (subject[0].publications?.length as number) / maxPublicationUploads;
+            subjectPublicationUploads / maxPublicationUploads;
+
+        // Final popularity calculation
+        const popularity =
+            weights.book_views * book_view_score +
+            weights.book_upload * book_uploads_score +
+            weights.publication_views * publication_view_score +
+            weights.publication_upload * publication_uploads_score;
+
+        // Debug logs
+        console.log("--- Popularity Score Debug ---");
+        console.log("Weights:", weights);
+        console.log("Subject:", subject.email);
+        console.log("Book Views:", subjectBookViews);
+        console.log("Max Book Views:", maxBookViews);
+        console.log("Book Uploads:", subjectBookUploads);
+        console.log("Max Book Uploads:", maxBookUploads);
+        console.log("Publication Views:", subjectPublicationViews);
+        console.log("Max Publication Views:", maxPublicationViews);
+        console.log("Publication Uploads:", subjectPublicationUploads);
+        console.log("Max Publication Uploads:", maxPublicationUploads);
+        console.log("Scores:", {
+            book_view_score,
+            book_uploads_score,
+            publication_view_score,
+            publication_uploads_score,
+        });
+        console.log("Total Popularity:", popularity);
+        console.log("------------------------------");
 
         return {
             email: popularityDto.email,
-            popularity:
-                weights.book_views * book_view_score +
-                weights.book_upload * book_uploads_score +
-                weights.publication_views * publication_view_score +
+            book_v: weights.book_views * book_view_score,
+            book_u: weights.book_upload * book_uploads_score,
+            publication_v: weights.publication_views * publication_view_score,
+            publication_u:
                 weights.publication_upload * publication_uploads_score,
+
+            popularity,
         };
     }
 }
