@@ -24,10 +24,15 @@ export class StatusService {
             if (!book) {
                 throw new NotFoundException("BOOK WAS NOT FOUND");
             }
-            this.bookRepository.update(book, {
+            this.bookRepository.save({
+                ...book,
                 viewCount: book.viewCount + 1,
             });
-            return { status: "SUCCESS" };
+            return {
+                status: "SUCCESS",
+                oldcount: book.viewCount,
+                newcount: book.viewCount + 1,
+            };
         }
         if (incrementDto.type === "publication") {
             const publication = await this.publicationRepository.findOneBy({
@@ -37,10 +42,16 @@ export class StatusService {
             if (!publication) {
                 throw new NotFoundException("PUBLICATION WAS NOT FOUND");
             }
-            this.publicationRepository.update(publication, {
+            this.publicationRepository.save({
+                ...publication,
                 viewCount: publication.viewCount + 1,
             });
-            return { status: "SUCCESS" };
+
+            return {
+                status: "SUCCESS",
+                oldcount: publication.viewCount,
+                newcount: publication.viewCount + 1,
+            };
         }
     }
 
